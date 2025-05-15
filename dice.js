@@ -7,15 +7,15 @@ export function d6Physics() {
   const d6Dimensions = new CANNON.Vec3(0.5, 0.5, 0.5);
   const d6Shape = new CANNON.Box(d6Dimensions);
   const d6Body = new CANNON.Body({
-    mass: 5,
+    mass: .00005,
     shape: d6Shape,
   });
   d6Body.material = dicePhysicsMaterial;
   d6Body.position.set(0, 6, 0);
   d6Body.velocity.set(
-    (Math.random() - 0.5) * 15,
+    (Math.random() - 0.5) * 25,
     10,
-    (Math.random() - 0.5) * 15
+    -(Math.random() - 0.5) * 25
   );
   d6Body.angularVelocity.set(
     (Math.random() - 0.5) * 15,
