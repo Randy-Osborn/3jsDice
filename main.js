@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
-import { createD6, d6Physics, dicePhysicsMaterial } from "./dice.js";
+import { createD6, d6Physics, getTopFaceNumber,dicePhysicsMaterial } from "./dice.js";
 import { createDiceBox, createDiceBoxBounds ,boxPhysicsMaterial } from "./diceBox.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
@@ -36,7 +36,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0.13, 12.54, 19.1);
+camera.position.set(0.13, 20.54, 9.1);
 camera.lookAt(0, 0, 0);
 
 //renderer
@@ -51,10 +51,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-//camera controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0, 0); // focus the controls on the center of the box
-controls.update();
+
 
 const d6 = createD6();
 scene.add(d6);
@@ -69,14 +66,39 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+
+
+let diceStopped = false;
+const VELOCITY_THRESHOLD = 0.05; // tweak as needed
+
+function isDiceAtRest(diceBody) {
+  const linearSpeed = diceBody.velocity.length();
+  const angularSpeed = diceBody.angularVelocity.length();
+  return linearSpeed < VELOCITY_THRESHOLD && angularSpeed < VELOCITY_THRESHOLD;
+}
 //animate
 function animate() {
   requestAnimationFrame(animate);
   world.fixedStep();
-  controls.update();
   d6.position.copy(d6Body.position);
   d6.quaternion.copy(d6Body.quaternion);
   renderer.render(scene, camera);
+
+   if (!diceStopped && isDiceAtRest(d6Body)) {
+    diceStopped = true;
+
+    // Get top face number now that dice is still
+    const rolledNumber = getTopFaceNumber(d6);
+    
+    // Display it (console or UI)
+    console.log("Rolled number:", rolledNumber);
+
+    // Example: update some HTML element
+    const outputElem = document.getElementById("diceRollResult");
+    if (outputElem) {
+      outputElem.textContent = `You rolled a ${rolledNumber}!`;
+    }
+  }
 }
 animate();
 const resetButton = document.getElementById("resetButton");
